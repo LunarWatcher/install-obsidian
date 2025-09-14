@@ -53,7 +53,7 @@ runs:
       if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt install -y ${{ runner.temp }}/obsidian_inst/*.deb
-        echo "OBSIDIAN_BIN_LOCATION=/usr/bin/obsidian"
+        echo "OBSIDIAN_BIN_LOCATION=/usr/bin/obsidian" >> $GITHUB_ENV
       shell: bash
 
     - name: Install obsidian artefact (Windows)
