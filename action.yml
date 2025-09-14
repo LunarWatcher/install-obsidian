@@ -34,8 +34,6 @@ runs:
           echo "Crapple shitOS's \"pay 4000+ EUR to develop anything in the apple ecosystem\" is not supported by this action"
           return -1
         fi
-        # TODO: does this result in ARTEFACT_IDENTIFIER being part of the composite action's output rather than just the step?
-        # I don't really want to expose a thing that's purely internal (because <insert spacebar heating xkcd here>)
         echo "ARTEFACT_IDENTIFIER=${ARTEFACT_IDENTIFIER}" >> $GITHUB_OUTPUT
       shell: bash
 
