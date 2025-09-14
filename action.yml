@@ -13,8 +13,10 @@ inputs:
 outputs:
   path:
     description: "The path (or a guess of the path) to the Obsidian install"
+    value: ${{ steps.output-generator.outputs.path }}
   version:
     description: "The version tag from the release used for the install"
+    value: ${{ steps.output-generator.outputs.version }}
 
 runs:
   using: "composite"
@@ -53,6 +55,7 @@ runs:
       if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt install -y ${{ runner.temp }}/obsidian_inst/*.deb
+        echo "OBSIDIAN_BIN_LOCATION=/usr/bin/obsidian"
       shell: bash
 
     - name: Install obsidian artefact (Windows)
@@ -64,21 +67,15 @@ runs:
           ${{ runner.temp }}\obsidian_inst\*.exe /S
           Start-Sleep -Seconds 5
         } until (Test-Path -path "$env:LOCALAPPDATA\\Programs\\Obsidian\\Obsidian.exe" -PathType Leaf)
-        echo "OBSIDIAN_LOCATION=$env:LOCALAPPDATA\\Programs\\Obsidian\\Obsidian.exe" >> $env:GITHUB_ENV
+        echo "OBSIDIAN_BIN_LOCATION=$env:LOCALAPPDATA\\Programs\\Obsidian\\Obsidian.exe" >> $env:GITHUB_ENV
         ls 'C:\Program Files'
         ls $env:LOCALAPPDATA\Programs\
       shell: powershell
 
     - name: Guess output binary location
+      id: output-generator
       run: |
-        if [[ "${{ runner.os }}" == "Windows" ]];
-        then
-          BINARY_LOCATION="$LOCALAPPDATA/Programs/Obsidian/Obsidian.exe"
-        elif [[ "${{ runner.os }}" == "Linux" ]];
-        then
-          BINARY_LOCATION="/usr/bin/obsidian"
-        fi
-        echo "path=${BINARY_LOCATION}" >> $GITHUB_OUTPUT
+        echo "path=${OBSIDIAN_BIN_LOCATION}" >> $GITHUB_OUTPUT
         # TODO: Is this safe?
         echo "version=${{ steps.yoink-obsidian.outputs.tag_name }}" >> $GITHUB_OUTPUT
       shell: bash
