@@ -1,0 +1,77 @@
+name: "Install Obsidian"
+description: "Installs Obsidian in the GitHub Action. Only compatible with Windows and Linux."
+
+inputs:
+  version:
+    description: "What version to install. Mutually exclusive with 'latest'"
+    required: false
+    default: ''
+  latest:
+    description: "Whether to install the latest version. Mutually exclusive with 'version'"
+    default: true
+    required: false
+outputs:
+  path:
+    description: "The path (or a guess of the path) to the Obsidian install"
+  version:
+    description: "The version tag from the release used for the install"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set artefact identifier
+      id: identifier
+      run: |
+        if [[ "${{ runner.os }}" == "Windows" ]];
+        then
+          ARTEFACT_IDENTIFIER="*.exe"
+        elif [[ "${{ runner.os }}" == "Linux" ]];
+        then
+          ARTEFACT_IDENTIFIER="_amd64.deb"
+        else
+          echo "Crapple shitOS's \"pay 4000+ EUR to develop anything in the apple ecosystem\" is not supported by this action"
+          return -1
+        fi
+        # TODO: does this result in ARTEFACT_IDENTIFIER being part of the composite action's output rather than just the step?
+        # I don't really want to expose a thing that's purely internal (because <insert spacebar heating xkcd here>)
+        echo "ARTEFACT_IDENTIFIER=${ARTEFACT_IDENTIFIER}" >> $GITHUB_OUTPUT
+      shell: bash
+    - name: Yoink Obsidian artefact
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: obsidianmd/obsidian-releases
+        latest: ${{ inputs.latest }}
+        tarBall: false
+        zipBall: false
+        tag: ${{ inputs.version }}
+        fileName: ${{ steps.identifier.outputs.ARTEFACT_IDENTIFIER }}
+        out-file-path: ${{ runner.temp }}/obsidian_inst
+    - name: Install obsidian artefact (Ubuntu)
+      if: ${{ runner.os == 'Linux' }}
+      run: |
+        sudo apt install -y ./obsidian_inst/*.deb
+    - name: Install obsidian artefact (Windows)
+      timeout-minutes: 2
+      if: ${{ runner.os == 'Windows' }}
+      # Not sure if it's best to run the installer inside the loop or outside the loop, but inside the loop
+      # might help with cases where it starts to fail and the install times out?
+      run: |
+        Do {
+          .\obsidian_inst\*.exe /S
+          Start-Sleep -Seconds 5
+        } until (Test-Path -path "$env:LOCALAPPDATA\\Programs\\Obsidian\\Obsidian.exe" -PathType Leaf)
+        echo "OBSIDIAN_LOCATION=$env:LOCALAPPDATA\\Programs\\Obsidian\\Obsidian.exe" >> $env:GITHUB_ENV
+        ls 'C:\Program Files'
+        ls $env:LOCALAPPDATA\Programs\
+      shell: powershell
+    - name: Guess output binary location
+      run: |
+        if [[ "${{ runner.os }}" == "Windows" ]];
+        then
+          BINARY_LOCATION="$LOCALAPPDATA/Programs/Obsidian/Obsidian.exe"
+        elif [[ "${{ runner.os }}" == "Linux" ]];
+        then
+          BINARY_LOCATION="/usr/bin/obsidian"
+        fi
+        echo "path=${BINARY_LOCATION}" >> $GITHUB_OUTPUT
+      shell: bash
