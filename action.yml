@@ -39,7 +39,7 @@ runs:
 
     - name: Yoink Obsidian artefact
       uses: robinraju/release-downloader@v1
-      id: yoink
+      id: yoink-obsidian
       with:
         repository: obsidianmd/obsidian-releases
         latest: ${{ inputs.latest }}
@@ -80,5 +80,5 @@ runs:
         fi
         echo "path=${BINARY_LOCATION}" >> $GITHUB_OUTPUT
         # TODO: Is this safe?
-        echo "version=${{ steps.yoink.outputs.tag_name }}" >> $GITHUB_OUTPUT
+        echo "version=${{ steps.yoink-obsidian.outputs.tag_name }}" >> $GITHUB_OUTPUT
       shell: bash
