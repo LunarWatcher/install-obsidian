@@ -36,8 +36,10 @@ runs:
         # I don't really want to expose a thing that's purely internal (because <insert spacebar heating xkcd here>)
         echo "ARTEFACT_IDENTIFIER=${ARTEFACT_IDENTIFIER}" >> $GITHUB_OUTPUT
       shell: bash
+
     - name: Yoink Obsidian artefact
       uses: robinraju/release-downloader@v1
+      id: yoink
       with:
         repository: obsidianmd/obsidian-releases
         latest: ${{ inputs.latest }}
@@ -46,13 +48,14 @@ runs:
         tag: ${{ inputs.version }}
         fileName: ${{ steps.identifier.outputs.ARTEFACT_IDENTIFIER }}
         out-file-path: ${{ runner.temp }}/obsidian_inst
+
     - name: Install obsidian artefact (Ubuntu)
       if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt install -y ./obsidian_inst/*.deb
       shell: bash
+
     - name: Install obsidian artefact (Windows)
-      timeout-minutes: 2
       if: ${{ runner.os == 'Windows' }}
       # Not sure if it's best to run the installer inside the loop or outside the loop, but inside the loop
       # might help with cases where it starts to fail and the install times out?
@@ -65,6 +68,7 @@ runs:
         ls 'C:\Program Files'
         ls $env:LOCALAPPDATA\Programs\
       shell: powershell
+
     - name: Guess output binary location
       run: |
         if [[ "${{ runner.os }}" == "Windows" ]];
@@ -75,4 +79,6 @@ runs:
           BINARY_LOCATION="/usr/bin/obsidian"
         fi
         echo "path=${BINARY_LOCATION}" >> $GITHUB_OUTPUT
+        # TODO: Is this safe?
+        echo "version=${{ steps.yoink.outputs.tag_name }}" >> $GITHUB_OUTPUT
       shell: bash
