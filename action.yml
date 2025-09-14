@@ -52,7 +52,7 @@ runs:
     - name: Install obsidian artefact (Ubuntu)
       if: ${{ runner.os == 'Linux' }}
       run: |
-        sudo apt install -y ./obsidian_inst/*.deb
+        sudo apt install -y ${{ runner.temp }}/obsidian_inst/*.deb
       shell: bash
 
     - name: Install obsidian artefact (Windows)
@@ -61,7 +61,7 @@ runs:
       # might help with cases where it starts to fail and the install times out?
       run: |
         Do {
-          .\obsidian_inst\*.exe /S
+          ${{ runner.temp }}\obsidian_inst\*.exe /S
           Start-Sleep -Seconds 5
         } until (Test-Path -path "$env:LOCALAPPDATA\\Programs\\Obsidian\\Obsidian.exe" -PathType Leaf)
         echo "OBSIDIAN_LOCATION=$env:LOCALAPPDATA\\Programs\\Obsidian\\Obsidian.exe" >> $env:GITHUB_ENV
