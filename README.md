@@ -5,7 +5,7 @@ Installs Obsidian for use with E2E tests or similar.
 ## Compatibility notes
 
 * Crapple shitOS: Not supported
-* Windows: Supported, but flaky due to problems with the installer. There's a timeout set for 2 minutes on the install step to prevent this from going on for too long.
+* Windows: Supported, but flaky due to problems with the installer step
 * Linux (Ubuntu): Supported, works reliably
 
 Note that both Linux and Windows can be flaky due to GitHub itself being flaky. No caching is implemented at the time of writing, and retrieval errors from GitHub does happen on occasion. 
@@ -13,6 +13,9 @@ Note that both Linux and Windows can be flaky due to GitHub itself being flaky. 
 ## Usage
 ```yaml
 - name: Install Obsidian
+  # Required: The Windows install can and will get stuck for the 6 hours it takes the action to hard timeout
+  # otherwise
+  timeout-minutes: 2
   uses: LunarWatcher/install-obsidian@master
   with:
     # Whether or not to grab the latest version. Mutually exclusive with `version`
