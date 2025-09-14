@@ -27,7 +27,7 @@ runs:
           ARTEFACT_IDENTIFIER="*.exe"
         elif [[ "${{ runner.os }}" == "Linux" ]];
         then
-          ARTEFACT_IDENTIFIER="_amd64.deb"
+          ARTEFACT_IDENTIFIER="*_amd64.deb"
         else
           echo "Crapple shitOS's \"pay 4000+ EUR to develop anything in the apple ecosystem\" is not supported by this action"
           return -1
