@@ -38,7 +38,7 @@ runs:
       shell: bash
 
     - name: Yoink Obsidian artefact
-      uses: robinraju/release-downloader@v1
+      uses: robinraju/release-downloader@v1.12
       id: yoink-obsidian
       with:
         repository: obsidianmd/obsidian-releases
